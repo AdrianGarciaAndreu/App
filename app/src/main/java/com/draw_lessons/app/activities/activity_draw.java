@@ -1,26 +1,23 @@
 package com.draw_lessons.app.activities;
 
-import android.app.ActionBar;
 import android.app.NotificationManager;
-import android.graphics.Path;
 import android.graphics.drawable.ColorDrawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
-import android.os.PersistableBundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 
 import com.draw_lessons.app.R;
 import com.draw_lessons.app.customView.Cnv;
 
 import java.io.File;
-import java.util.ArrayList;
 
 public class activity_draw extends ActionBarActivity {
 
@@ -41,7 +38,7 @@ public class activity_draw extends ActionBarActivity {
         setContentView(R.layout.activity_draw);
 
         this.createDrawer();
-        //this.ToolbarCustom();
+        this.ToolbarCustom();
 
         this.items = new MenuItem[4];
         this.prepareFolders();
@@ -125,6 +122,8 @@ public class activity_draw extends ActionBarActivity {
 
 
         this.l1.addView(canvas);
+
+
     }
 
 
@@ -134,9 +133,15 @@ public class activity_draw extends ActionBarActivity {
      * tareas
      */
     public void ToolbarCustom(){
-        ActionBar ab = this.getActionBar();
-        ColorDrawable cd = new ColorDrawable(0x5500AAEE);
-        ab.setBackgroundDrawable(cd);
+        android.support.v7.app.ActionBar ab = this.getSupportActionBar();
+        ab.setBackgroundDrawable(new ColorDrawable(0x5500AAEE));
+
+        ab.setHomeButtonEnabled(true);
+        ab.setLogo(R.drawable.icondl);
+
+
+        ab.setDisplayShowHomeEnabled(true);
+        ab.setIcon(R.drawable.icondl);
 
     }
 
@@ -283,7 +288,6 @@ public class activity_draw extends ActionBarActivity {
 
     }
 
-    //////////////////////////////////
 
 
     @Override
