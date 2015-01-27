@@ -18,12 +18,16 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
+import com.draw_lessons.app.Extras.PathHandler;
 import com.draw_lessons.app.activities.activity_draw;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
@@ -138,9 +142,7 @@ public class Cnv extends View{
         this.p.setStrokeWidth(this.brushSize);
 
         this.p.setStyle(Paint.Style.STROKE);
-
         this.p.setStrokeCap(Paint.Cap.ROUND);
-
         this.p.setColor(this.StrokeColor);
 
         this.cnv = new Canvas(this.bmp);
@@ -627,13 +629,61 @@ public class Cnv extends View{
     }
 
 
-    public void restoreIMG(String path){
-        Bitmap bit = BitmapFactory.decodeFile(path);
-        this.cnv.drawBitmap(bit, 0, 0, this.p);
-        //this.bmp = bit;
-        this.invalidate();
+    public void savePaths(){
+
+        PathHandler p = PathHandler.getInstance();
+        p.setList(this.Trazos);
+    /*
+        try {
+            File f = new File(Environment.getExternalStorageDirectory()+"/DrawLessons/file.temp");
+            FileOutputStream fos = new FileOutputStream(f);
+            ObjectOutputStream oos = new ObjectOutputStream(fos);
+
+            oos.writeObject(this.Trazos);
+
+        }catch(Exception e){
+
+        }*/
+
     }
 
+    /**
+     * restore de Paths
+     */
+    public void restorePaths(){
+       /* try {
+            File f= new File(Environment.getExternalStorageDirectory()+"/DrawLessons/file.temp");
+            FileInputStream fis = new FileInputStream(f);
+            ObjectInputStream ois = new ObjectInputStream(fis);
+
+            this.Trazos = (ArrayList<Path>) ois.readObject();
+
+        }catch (Exception e){
+
+        }*/
+
+        PathHandler p = PathHandler.getInstance();
+        this.Trazos = p.getList();
+
+
+        this.bmp = Bitmap.createBitmap(this.resX, this.resY, Bitmap.Config.ARGB_4444);
+        this.cnv = new Canvas(this.bmp);
+        this.cnv.drawColor(this.backColor);
+
+
+        this.p = new Paint();
+        this.p.setStrokeWidth(this.brushSize);
+        this.p.setStyle(Paint.Style.STROKE);
+        this.p.setStrokeCap(Paint.Cap.ROUND);
+        this.p.setColor(this.StrokeColor);
+
+
+        for (int i=0; i<this.Trazos.size() ; i++){
+            this.cnv.drawPath(this.Trazos.get(i),this.p);
+        }
+
+        this.invalidate();
+    }
 
 
 

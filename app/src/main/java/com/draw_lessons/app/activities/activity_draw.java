@@ -9,6 +9,7 @@ import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.os.PersistableBundle;
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
@@ -26,12 +27,13 @@ public class activity_draw extends ActionBarActivity {
     private LinearLayout l1;
     private Cnv canvas;
     private MenuItem items[];
-
     private int AppColor = 0x5500AAEE; //color básico de la aplicacion
 
 
     public boolean toolClicked = true;
     public int ClickedID = 0;
+
+    private String appPath=Environment.getExternalStorageDirectory().toString()+"/DrawLessons";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -60,19 +62,14 @@ public class activity_draw extends ActionBarActivity {
             @Override
             public void run() {
 
-                File f = new File(Environment.getExternalStorageDirectory().toString()+"/Pictures/DrawLessons");
+                File f = new File(appPath);
                 if (!f.exists()){
                     f.mkdirs();
 
                     nb.setSmallIcon(R.drawable.ic_launcher);
-                    //nb.setLargeIcon(BitmapFactory.decodeResource(getResources(), R.drawable.icondl));
                     nb.setContentTitle("Directorio correcto");
-                    nb.setContentText("Directorio para DrawLessons creado correctamente, en la ruta ./Picutres/DrawLessons");
-
-
+                    nb.setContentText("Directorio para DrawLessons creado correctamente.");
                     Uri u = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-                    nb.setSound(u);
-
 
                     NotificationManager nmc = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
 
@@ -289,33 +286,19 @@ public class activity_draw extends ActionBarActivity {
     //////////////////////////////////
 
 
-    ArrayList<Path> Trazos = new ArrayList<Path>();
-
-    //boolean paused=false;
     @Override
-    protected void onPause() {
-        super.onPause();
-        this.canvas.SaveIMG();
-        this.Trazos = this.canvas.getTrazos();
+    public void onSaveInstanceState(Bundle outState) {
+        super.onSaveInstanceState(outState);
 
-        //this.paused=true;
+        this.canvas.savePaths();
+
     }
 
-    ////////////////////////////////////
-
     @Override
-    protected void onResume() {
-        super.onResume();
+    protected void onRestoreInstanceState(Bundle savedInstanceState) {
+        super.onRestoreInstanceState(savedInstanceState);
 
-        String path = Environment.getExternalStorageDirectory()+"/Pictures/img.tmp";
-        File f = new File(path);
-
-        if  (f.exists()){
-            this.canvas.restoreIMG(path);
-            this.canvas.setTrazos(this.Trazos);
-
-            //paused=false;
-        }
+        this.canvas.restorePaths();
     }
 
     /**
