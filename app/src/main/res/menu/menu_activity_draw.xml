@@ -1,0 +1,41 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    tools:context="com.draw_lessons.app.activities.activity_draw">
+    <!-- Icono regla recta -->
+    <item
+        android:id="@+id/ruler_tool"
+        app:showAsAction="always"
+        android:title="@string/ruler"
+        android:icon="@drawable/ruler"/>
+
+
+    <!-- Icono compas -->
+    <item
+        android:id="@+id/compass_tool"
+        app:showAsAction="always"
+        android:title="@string/compass"
+        android:icon="@drawable/compass"/>
+
+    <!-- Icono mano alzada -->
+    <item
+        android:id="@+id/hand_tool"
+        app:showAsAction="always"
+        android:title="@string/hand"
+        android:icon="@drawable/hand"/>
+
+    <!-- Icono goma -->
+    <item
+        android:id="@+id/eraser_tool"
+        app:showAsAction="always"
+        android:title="@string/eraser"
+        android:icon="@drawable/eraser"/>
+
+
+
+    <!-- Icono de guardado del canvas -->
+    <item
+        android:id="@+id/sv"
+        app:showAsAction="never"
+        android:title="@string/save_draw" />
+</menu>

@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Draw Lessons</string>
+    <string name="save_draw">Guardar</string>
+    <string name="ruler">R.Recta</string>
+    <string name="compass">Compás</string>
+    <string name="hand">Mano alzada</string>
+    <string name="eraser">Limpiar</string>
+    <string name="title_activity_activity_draw">activity_draw</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+
+</resources>
