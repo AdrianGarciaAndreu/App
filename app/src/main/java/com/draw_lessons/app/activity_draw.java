@@ -1,25 +1,26 @@
-package com.draw_lessons.app.activities;
+package com.draw_lessons.app;
 
 import android.app.NotificationManager;
-import android.graphics.drawable.ColorDrawable;
+import android.content.Context;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
+import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
-import android.support.v7.app.ActionBarActivity;
+import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
+import android.view.View;
+import android.view.ViewGroup;
 import android.widget.LinearLayout;
-
-import com.draw_lessons.app.R;
-import com.draw_lessons.app.customView.Cnv;
 
 import java.io.File;
 
-public class activity_draw extends ActionBarActivity {
+import draw_lessons.com.drawlessons.R;
+
+public class activity_draw extends Fragment {
 
     private LinearLayout l1;
     private Cnv canvas;
@@ -33,15 +34,17 @@ public class activity_draw extends ActionBarActivity {
     private String appPath=Environment.getExternalStorageDirectory().toString()+"/DrawLessons";
 
     @Override
-    protected void onCreate(Bundle savedInstanceState) {
+	public View onCreateView(LayoutInflater inflater, ViewGroup container, Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_draw);
+		View vi = inflater.inflate(R.layout.activity_draw,container,false);
+
 
         this.createDrawer();
-        this.ToolbarCustom();
+//        this.ToolbarCustom();
 
         this.items = new MenuItem[4];
         this.prepareFolders();
+		return vi;
 
     }
 
@@ -52,7 +55,7 @@ public class activity_draw extends ActionBarActivity {
 
     public void prepareFolders(){
 
-        nb = new NotificationCompat.Builder(this);
+        nb = new NotificationCompat.Builder(this.getActivity());
 
         new Thread(new Runnable() {
 
@@ -65,10 +68,10 @@ public class activity_draw extends ActionBarActivity {
 
                     nb.setSmallIcon(R.drawable.ic_launcher);
                     nb.setContentTitle("Directorio correcto");
-                    nb.setContentText("Directorio para DrawLessons creado correctamente.");
+                    nb.setContentText("Directorio DrawLessons creado correctamente.");
                     Uri u = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-                    NotificationManager nmc = (NotificationManager)getSystemService(NOTIFICATION_SERVICE);
+                    NotificationManager nmc = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
 
                     nmc.notify(1, nb.build());
 
@@ -106,13 +109,13 @@ public class activity_draw extends ActionBarActivity {
      */
     public void createDrawer(){
 
-        int x = this.getWindowManager().getDefaultDisplay().getWidth(); //resolucion del ancho de la pantalla
-        int y = this.getWindowManager().getDefaultDisplay().getHeight(); // resolucion del alto de la pantalla
+        int x = getActivity().getWindowManager().getDefaultDisplay().getWidth(); //resolucion del ancho de la pantalla
+        int y =getActivity().getWindowManager().getDefaultDisplay().getHeight(); // resolucion del alto de la pantalla
 
-        this.l1 =(LinearLayout)this.findViewById(R.id.LinearLCnv1);
+        this.l1 =(LinearLayout)getActivity().findViewById(R.id.LinearLCnv1);
 
 
-        this.canvas = new Cnv(this);
+        this.canvas = new Cnv(getParentFragment().getActivity().getParent());
 
         this.canvas.setResX(x);
         this.canvas.setResY(y);
@@ -132,8 +135,8 @@ public class activity_draw extends ActionBarActivity {
      * la personalización de la barra de
      * tareas
      */
-    public void ToolbarCustom(){
-        android.support.v7.app.ActionBar ab = this.getSupportActionBar();
+   /* public void ToolbarCustom(){
+        android.support.v7.app.ActionBar ab = .getSupportActionBar();
         ab.setBackgroundDrawable(new ColorDrawable(0x5500AAEE));
 
         ab.setHomeButtonEnabled(true);
@@ -143,19 +146,19 @@ public class activity_draw extends ActionBarActivity {
         ab.setDisplayShowHomeEnabled(true);
         ab.setIcon(R.drawable.icondl);
 
-    }
+    }*/
 
 
-    /**
+   /* *//**
      * Método para manjera los menus
      * de la ActionBar del activity
-     */
+     *//*
     @Override
     public boolean onCreateOptionsMenu(Menu menu) {
         this.addMenuActions(menu);
 
         return true;
-    }
+    }*/
 
 
 
@@ -298,12 +301,12 @@ public class activity_draw extends ActionBarActivity {
 
     }
 
-    @Override
+   /* @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
 
         this.canvas.restorePaths();
-    }
+    }*/
 
     /**
      * retorna el color de la app

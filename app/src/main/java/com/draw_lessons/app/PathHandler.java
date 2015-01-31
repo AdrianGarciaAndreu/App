@@ -1,6 +1,7 @@
-package com.draw_lessons.app.Extras;
+package com.draw_lessons.app;
 
 import android.graphics.Path;
+
 import java.util.ArrayList;
 
 /**

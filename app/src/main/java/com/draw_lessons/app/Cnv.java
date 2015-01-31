@@ -1,4 +1,4 @@
-package com.draw_lessons.app.customView;
+package com.draw_lessons.app;
 
 import android.app.AlertDialog;
 import android.app.AlertDialog.Builder;
@@ -6,28 +6,20 @@ import android.content.Context;
 import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
 import android.os.Environment;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import com.draw_lessons.app.Extras.PathHandler;
-import com.draw_lessons.app.activities.activity_draw;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 
 
@@ -40,6 +32,9 @@ import java.util.ArrayList;
  *
  */
 public class Cnv extends View{
+
+	Context thisContext;
+
 
     public final int SIZE_SMALL = 5;
     public final int SIZE_MEDIUM = 8;
@@ -105,13 +100,17 @@ public class Cnv extends View{
 
     private ArrayList<Integer> earserPaths = new ArrayList<Integer>();
 
+	public Cnv(Context context) {
+		super(context);
+	}
 
-    /**
+
+	/**
      * Constructores heredados de View
-     * @param context
-     */
+	 * @param context
+	 */
 
-    public Cnv(Context context) {
+   /* public Cnv(Fragment context) {
         super(context);
     }
 
@@ -121,7 +120,9 @@ public class Cnv extends View{
 
     public Cnv(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-    }
+    }*/
+
+
 
 
 
@@ -134,7 +135,7 @@ public class Cnv extends View{
     public void prepareCancas(){
 
         //crea el bitmap
-        Bitmap.Config  bcfg = Config.RGB_565 ;
+        Config  bcfg = Config.RGB_565 ;
         this.bmp = Bitmap.createBitmap(this.resX, this.resY, bcfg);
 
         //crea la brocha
@@ -195,7 +196,7 @@ public class Cnv extends View{
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        activity_draw da = (activity_draw)this.getContext();
+        activity_draw da = (activity_draw)this.getParent();
 
         if (da.toolClicked==false) {
             da.hide(da.ClickedID);
@@ -235,7 +236,7 @@ public class Cnv extends View{
 		 * Crea un canvas y un objeto paint solo para pintar sobre un bitmap dedicado
 		 * a la regla recta
 		 */
-        this.rulerBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
+        this.rulerBmp = Bitmap.createBitmap(this.resX,this.resY, Config.ARGB_4444);
 
         Canvas tmpCNV = new Canvas(this.rulerBmp);
         tmpCNV.drawColor(Color.TRANSPARENT);
@@ -244,7 +245,7 @@ public class Cnv extends View{
         tmpP.setStyle(Paint.Style.STROKE);
         tmpP.setStrokeWidth(5);
 
-        activity_draw d =(activity_draw)this.getContext();
+        activity_draw d =(activity_draw)this.getParent();
         tmpP.setColor(d.getAppColor());
 
 
@@ -380,11 +381,11 @@ public class Cnv extends View{
 
 
     /**
-     * Método de movimiento de compass	
+     * Método de movimiento de compass
      */
     public void onCompassTouch(MotionEvent event){
 
-        this.compassBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
+        this.compassBmp = Bitmap.createBitmap(this.resX,this.resY, Config.ARGB_4444);
 
         Canvas tmpCNV = new Canvas(this.compassBmp);
         tmpCNV.drawColor(Color.TRANSPARENT);
@@ -393,7 +394,7 @@ public class Cnv extends View{
         tmpP.setStyle(Paint.Style.STROKE);
         tmpP.setStrokeWidth(5);
 
-        activity_draw d =(activity_draw)this.getContext();
+        activity_draw d =(activity_draw)this.getParent();
         tmpP.setColor(d.getAppColor());
 
         double c=0.0d;
@@ -584,10 +585,10 @@ public class Cnv extends View{
 
     /**
      * Metodo para guardar el proyecto en forma de imagen el canvas
-     * @throws IOException
+     * @throws java.io.IOException
      */
     public void SaveIMG() {
-        da = (activity_draw)this.getContext();
+        da = (activity_draw)this.getParent();
 
         new Thread(new Runnable() {
 
@@ -666,7 +667,7 @@ public class Cnv extends View{
         this.Trazos = p.getList();
 
 
-        this.bmp = Bitmap.createBitmap(this.resX, this.resY, Bitmap.Config.ARGB_4444);
+        this.bmp = Bitmap.createBitmap(this.resX, this.resY, Config.ARGB_4444);
         this.cnv = new Canvas(this.bmp);
         this.cnv.drawColor(this.backColor);
 
@@ -693,14 +694,14 @@ public class Cnv extends View{
      */
     public void Clean(){
 
-        activity_draw da = (activity_draw)this.getContext();
+        activity_draw da = (activity_draw)this.getParent();
         if (da.toolClicked==false){
             da.toolClicked=true;
             da.hide(da.ClickedID);
         }
 
 
-        Builder b = new AlertDialog.Builder(this.getContext());
+        Builder b = new Builder(this.getContext());
         b.setMessage("¿Seguro que deseas re-establecer el lienzo?");
         b.setCancelable(true);
         b.setPositiveButton(" ¡ Un momento !!", new DialogInterface.OnClickListener() {
