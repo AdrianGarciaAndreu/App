@@ -27,12 +27,13 @@ public class DlNavDrawer extends MaterialNavigationDrawer implements MaterialAcc
 		//set an account listener
 		this.setAccountListener(this);
 
+
 		//create levels in navigation drawer
 //		this.addSection(newSection("Dibujar", new activity_draw()));
 		this.addSection(newSection("Cursos", new activity_cursos()));
 		// create bottom section
-		this.addBottomSection(newSection("Bottom Section",R.drawable.ic_settings_black_24dp,new Intent(this,Settings.class)));
-
+		this.addBottomSection(newSection("Bottom Section",R.drawable.ic_settings_black_24dp,new Intent(this,getClass())));
+		setDrawerBackgroundColor(R.color.cardview_light_background);
 
 	}
 
