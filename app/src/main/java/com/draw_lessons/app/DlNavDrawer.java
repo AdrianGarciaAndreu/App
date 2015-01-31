@@ -1,14 +1,17 @@
 package com.draw_lessons.app;
 
+import android.app.Fragment;
 import android.content.Intent;
 import android.os.Bundle;
 import android.provider.Settings;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.SectionIndexer;
 
 import draw_lessons.com.drawlessons.R;
 import it.neokree.materialnavigationdrawer.MaterialNavigationDrawer;
 import it.neokree.materialnavigationdrawer.elements.MaterialAccount;
+import it.neokree.materialnavigationdrawer.elements.MaterialSection;
 import it.neokree.materialnavigationdrawer.elements.listeners.MaterialAccountListener;
 
 
@@ -19,21 +22,30 @@ public class DlNavDrawer extends MaterialNavigationDrawer implements MaterialAcc
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dl_nav_drawer);
 	}*/
+
+
+
 	public void init(Bundle savedInstanceState) {
 		//add some accounts
+		allowArrowAnimation();
+		this.disableLearningPattern();
 		MaterialAccount account = new MaterialAccount(this.getResources(),"Aleix","aleix.casanova@gmail.com", R.drawable.photo, R.drawable.bamboo);
 		this.addAccount(account);
 
-		//set an account listener
+		// set an account listener
 		this.setAccountListener(this);
 
 
 		//create levels in navigation drawer
 //		this.addSection(newSection("Dibujar", new activity_draw()));
-		this.addSection(newSection("Cursos", new activity_cursos()));
+		MaterialSection s1 = newSection("Cursos", new activity_cursos());
+		this.addSection(s1);
+		s1.useRealColor();
+
 		// create bottom section
-		this.addBottomSection(newSection("Bottom Section",R.drawable.ic_settings_black_24dp,new Intent(this,getClass())));
-		setDrawerBackgroundColor(R.color.cardview_light_background);
+//		this.addBottomSection(newSection("Inicio",R.drawable.ic_settings_black_24dp,new Intent(this,getClass())));
+
+		setDrawerBackgroundColor(getResources().getColor(R.color.drawerBack));
 
 	}
 

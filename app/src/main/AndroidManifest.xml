@@ -15,7 +15,8 @@
         android:theme="@style/DlDrawerTheme" >
         <activity
             android:name="com.draw_lessons.app.DlNavDrawer"
-            android:label="@string/app_name" >
+            android:label="@string/app_name"
+            android:screenOrientation="landscape">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
                 <category android:name="android.intent.category.LAUNCHER" />

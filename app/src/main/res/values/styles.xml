@@ -1,15 +1,19 @@
 <resources>
 
     <!-- Base application theme. -->
-    <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
+    <style name="AppTheme" parent="Base.V14.Theme.AppCompat">
 
         
     </style>
     <style name="DlDrawerTheme" parent="MaterialNavigationDrawerTheme">
-        <item name="colorPrimary">#2196F3</item>
-        <item name="colorPrimaryDark">#1976D2</item>
+        <item name="colorPrimary">#1976D2</item>
+        <item name="colorPrimaryDark">#2196F3</item>
         <item name="colorAccent">#03A9F4</item>
+        <item name="drawerType">@integer/DRAWERTYPE_ACCOUNTS</item>
         <item name="singleAccount">true</item>
-    </style>
+        <item name="sectionStyle">@style/MaterialSectionTheme.Light</item>
+        <item name="rippleBackport">true</item>
+</style>
+
 
 </resources>

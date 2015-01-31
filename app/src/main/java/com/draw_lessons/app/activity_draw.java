@@ -1,5 +1,6 @@
 package com.draw_lessons.app;
 
+import android.app.Activity;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.media.RingtoneManager;
@@ -50,7 +51,7 @@ public class activity_draw extends Fragment {
 
 
 
-    NotificationCompat.Builder nb;
+	NotificationCompat.Builder nb;
 
 
     public void prepareFolders(){
