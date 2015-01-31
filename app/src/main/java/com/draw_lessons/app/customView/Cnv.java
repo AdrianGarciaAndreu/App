@@ -12,10 +12,11 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import com.draw_lessons.app.extras.PathHandler;
+import com.draw_lessons.app.extras.SavePaths;
 import com.draw_lessons.app.R;
 import com.draw_lessons.app.activities.activity_draw;
 import com.draw_lessons.app.actions.Cleaner;
+import com.draw_lessons.app.extras.SavePaths;
 
 import java.util.ArrayList;
 
@@ -544,9 +545,9 @@ public class Cnv extends View{
 
 
     public void savePaths(){
-        PathHandler p = PathHandler.getInstance();
+        SavePaths p = SavePaths.getInstance();
         p.setList(this.Trazos);
-        p.setList2(this.earserPaths);
+        p.setListB(this.earserPaths);
     }
 
 
@@ -555,7 +556,7 @@ public class Cnv extends View{
      */
     public void restorePaths(){
 
-        PathHandler p = PathHandler.getInstance();
+        SavePaths p = SavePaths.getInstance();
         this.Trazos = p.getList();
         this.earserPaths = p.getList2();
 
