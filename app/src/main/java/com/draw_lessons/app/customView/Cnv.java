@@ -1,34 +1,24 @@
 package com.draw_lessons.app.customView;
 
-import android.app.AlertDialog;
-import android.app.AlertDialog.Builder;
 import android.content.Context;
-import android.content.DialogInterface;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
-import android.graphics.BitmapFactory;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
-import android.os.Environment;
-import android.util.AttributeSet;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
 
-import com.draw_lessons.app.Extras.PathHandler;
+import com.draw_lessons.app.extras.PathHandler;
+import com.draw_lessons.app.R;
 import com.draw_lessons.app.activities.activity_draw;
+import com.draw_lessons.app.actions.Cleaner;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.ObjectInputStream;
-import java.io.ObjectOutputStream;
 import java.util.ArrayList;
+
 
 
 /**
@@ -41,69 +31,62 @@ import java.util.ArrayList;
  */
 public class Cnv extends View{
 
-    public final int SIZE_SMALL = 5;
-    public final int SIZE_MEDIUM = 8;
-    public final int SIZE_MAX = 12;
-
-
-    // Variables que indican las coordenadas de pulsacion de un evento
-    private float upX=0, upY=0;
-    private float downX=0, downY=0;
+    /*
+        Constantes de tamaño de la brocha
+     */
+    public static final int SIZE_SMALL = 5;
+    public static final int SIZE_MEDIUM = 8;
+    public static final int SIZE_MAX = 12;
+    private int rubIcon; // id de referencia al icono de la papelera
 
 
     // Herramientas del canvas
-    private boolean Ruler = false;
-    private boolean Compass = false;
-    private boolean HandMade = false;
-    private boolean Eraser = false;
+    public static boolean Ruler = false;
+    public static boolean Compass = false;
+    public static boolean HandMade = false;
+    public static boolean Eraser = false;
 
 
-    private Canvas cnv; //Objeto Canvas personalizado con el que re-escribiremos el Canvas predeterminado del View
+    private Canvas cnv; //Objeto Canvas para re-renderizar el View
     private Bitmap bmp; //Imagen que queda dibujada sobre nuestro Canvas
-    private Paint p; // Objeto Paint o pincel (brocha) que servira en todo momento para pintar del tamaño, color o forma que queramos
-    private Color col; // Variable de tipo Color que almacenara el color actual de nuestro Objeto Paint
+    public static Paint p; //Brocha de dibujado principal
+    private Path mPa; //Trazo principal de dibujo
+
 
     private int brushSize; // Variable para guardar el tamaño actual del Paint
     private int resX,resY; // Variables para indicar la resolución de nuestro Bitmap
 
-    private int backColor = 0xFFFFFFFF; //color de fondo del proyecto
-    private int StrokeColor = 0xFF000000; //color de la brocha del proyecto
 
-    private ArrayList<Path> Trazos = new ArrayList<Path>(); //Array para almacenar los pasos hechos en el dibujo
+    private int doBack = 1;
+    private boolean isUnDone = false;
 
-    private Path mPa;
+    //Arrays y listas
+    public ArrayList<Path> Trazos = new ArrayList<Path>(); //Array para almacenar los pasos hechos en el dibujo
+    private ArrayList<Integer> earserPaths = new ArrayList<Integer>(); //Almacena los paths hechos con le goma
 
-    private int rubIcon;
 
 
     /*
      * Variables de la herrmaienta
      * Regla recta
      */
-    private float rulerX1=0, rulerX2=0, rulerY1=0, rulerY2=0; //coordenadas para trazar la linea de la regla
-    private boolean rulerT1=false, rulerT2=false; //numero de veces tocado el canvas
+    public static Bitmap rulerBmp;
+    public static boolean rulerLayer = false;
+    public static boolean rulerT1=false, rulerT2=false;
 
-    private Bitmap rulerBmp; // Bitmap usado a modo de capa sobre el canvas de la regla
-    private boolean rulerLayer = false;
+    private float rulerX1=0, rulerX2=0, rulerY1=0, rulerY2=0;
+
 
     /*
      * Variables de la herramienta
      * Compas
      */
-    private Bitmap compassBmp;
-    private boolean compasLayer = false;
-    private boolean compassT1=false,compassT2=false;
+    public static Bitmap compassBmp;
+    public static boolean compasLayer = false;
+    public static boolean compassT1=false,compassT2=false;
 
     private float compassX1=0.0F, compassX2=0.0F, compassY1=0.0F, compassY2=0.0F;
 
-
-
-    private int doBack = 1;
-    private boolean isUnDone = false;
-
-
-
-    private ArrayList<Integer> earserPaths = new ArrayList<Integer>();
 
 
     /**
@@ -114,15 +97,6 @@ public class Cnv extends View{
     public Cnv(Context context) {
         super(context);
     }
-
-    public Cnv(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public Cnv(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
 
 
 
@@ -143,10 +117,10 @@ public class Cnv extends View{
 
         this.p.setStyle(Paint.Style.STROKE);
         this.p.setStrokeCap(Paint.Cap.ROUND);
-        this.p.setColor(this.StrokeColor);
+        this.p.setColor(this.getResources().getColor(R.color.stroke_color));
 
         this.cnv = new Canvas(this.bmp);
-        this.cnv.drawColor(this.backColor);
+        this.cnv.drawColor(this.getResources().getColor(R.color.back_color));
 
         this.mPa = new Path();
         this.mPa.moveTo(0, 0);
@@ -154,8 +128,9 @@ public class Cnv extends View{
         this.Trazos.add(mPa);
         this.mPa = new Path();
 
-
         this.HandMade=true; //por defecto pintura a mano alzada
+
+
     }
 
 
@@ -188,8 +163,6 @@ public class Cnv extends View{
 
 
 
-
-
     /**
      * Método que sobre-escribe lo que ocurre al generar un evento de tipo Touch
      */
@@ -200,7 +173,6 @@ public class Cnv extends View{
         if (da.toolClicked==false) {
             da.hide(da.ClickedID);
         }
-
 
         if(this.isUnDone==true){
             this.isUnDone=false;
@@ -225,7 +197,6 @@ public class Cnv extends View{
 
 
 
-
     /**
      * Método de movimiento con la regla recta
      */
@@ -234,7 +205,9 @@ public class Cnv extends View{
 		/*
 		 * Crea un canvas y un objeto paint solo para pintar sobre un bitmap dedicado
 		 * a la regla recta
+		 *
 		 */
+
         this.rulerBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
 
         Canvas tmpCNV = new Canvas(this.rulerBmp);
@@ -244,13 +217,9 @@ public class Cnv extends View{
         tmpP.setStyle(Paint.Style.STROKE);
         tmpP.setStrokeWidth(5);
 
-        activity_draw d =(activity_draw)this.getContext();
-        tmpP.setColor(d.getAppColor());
+        tmpP.setColor(this.getResources().getColor(R.color.app_color));
 
 
-		/*
-		 * Captura los eventos
-		 */
         switch(event.getAction()){
 
             case MotionEvent.ACTION_MOVE:
@@ -379,6 +348,7 @@ public class Cnv extends View{
 
 
 
+
     /**
      * Método de movimiento de compass	
      */
@@ -393,8 +363,7 @@ public class Cnv extends View{
         tmpP.setStyle(Paint.Style.STROKE);
         tmpP.setStrokeWidth(5);
 
-        activity_draw d =(activity_draw)this.getContext();
-        tmpP.setColor(d.getAppColor());
+        tmpP.setColor(this.getResources().getColor(R.color.app_color));
 
         double c=0.0d;
 
@@ -497,6 +466,38 @@ public class Cnv extends View{
 
 
 
+//////////////////////////////////////////////////////////////////
+/////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////
+    /**
+     * Método de movimiento de compass 2
+     */
+    public void onCompassTouch2(MotionEvent event){
+
+        this.compassBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
+
+        Canvas tmpCNV = new Canvas(this.compassBmp);
+        tmpCNV.drawColor(Color.TRANSPARENT);
+
+        Paint tmpP = new Paint();
+        tmpP.setStyle(Paint.Style.STROKE);
+        tmpP.setStrokeWidth(5);
+
+        tmpP.setColor(this.getResources().getColor(R.color.app_color));
+
+
+
+        double r =0.0d;
+
+
+
+
+    }
+
+
+
+
+
     /**
      * Metodo que representa
      * a una goma de borrar mediante
@@ -506,7 +507,7 @@ public class Cnv extends View{
     public void onEraserTouch(MotionEvent event){
 
         this.p.setStrokeWidth(this.SIZE_MAX);
-        this.p.setColor(this.backColor);
+        this.p.setColor(this.getResources().getColor(R.color.back_color));
 
         int e = event.getAction();
         switch(e){
@@ -537,7 +538,7 @@ public class Cnv extends View{
                 this.invalidate();
 
                 this.p.setStrokeWidth(this.SIZE_SMALL);
-                this.p.setColor(this.StrokeColor);
+                this.p.setColor(this.getResources().getColor(R.color.stroke_color));
 
 
                 break;
@@ -549,13 +550,11 @@ public class Cnv extends View{
                 this.invalidate();
 
                 this.p.setStrokeWidth(this.SIZE_SMALL);
-                this.p.setColor(this.StrokeColor);
+                this.p.setColor(this.getResources().getColor(R.color.stroke_color));
                 break;
         }
 
     }
-
-
 
 
 
@@ -566,7 +565,7 @@ public class Cnv extends View{
      * desde su centro
      * @return
      */
-    private double getRadius(){
+    public double getRadius(){
 
 
         float a = (this.compassX1 - this.compassX2);
@@ -579,108 +578,51 @@ public class Cnv extends View{
     }
 
 
-
-    activity_draw da;
-
-    /**
-     * Metodo para guardar el proyecto en forma de imagen el canvas
-     * @throws IOException
-     */
-    public void SaveIMG() {
-        da = (activity_draw)this.getContext();
-
-        new Thread(new Runnable() {
-
-            @Override
-            public void run() {
-
-                String path = "/Pictures/img.tmp";
-
-                File f = new File(Environment.getExternalStorageDirectory().toString()+path);
-                FileOutputStream fos;
-                try {
-                    fos = new FileOutputStream(f);
-
-
-                    if (f.exists()==false){
-                        f.createNewFile();
-                    }
-
-                    bmp.compress(Bitmap.CompressFormat.PNG, 100, fos);
-                    //Reemplazar por notificación y añadir un Thread
-
-                    if (da.toolClicked==false){
-                        da.toolClicked=true;
-                        da.hide(da.ClickedID);
-                    }
-
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }).start();
-
-
-
-    }
-
-
     public void savePaths(){
-
         PathHandler p = PathHandler.getInstance();
         p.setList(this.Trazos);
-    /*
-        try {
-            File f = new File(Environment.getExternalStorageDirectory()+"/DrawLessons/file.temp");
-            FileOutputStream fos = new FileOutputStream(f);
-            ObjectOutputStream oos = new ObjectOutputStream(fos);
-
-            oos.writeObject(this.Trazos);
-
-        }catch(Exception e){
-
-        }*/
-
+        p.setList2(this.earserPaths);
     }
+
 
     /**
      * restore de Paths
      */
     public void restorePaths(){
-       /* try {
-            File f= new File(Environment.getExternalStorageDirectory()+"/DrawLessons/file.temp");
-            FileInputStream fis = new FileInputStream(f);
-            ObjectInputStream ois = new ObjectInputStream(fis);
-
-            this.Trazos = (ArrayList<Path>) ois.readObject();
-
-        }catch (Exception e){
-
-        }*/
 
         PathHandler p = PathHandler.getInstance();
         this.Trazos = p.getList();
+        this.earserPaths = p.getList2();
 
 
         this.bmp = Bitmap.createBitmap(this.resX, this.resY, Bitmap.Config.ARGB_4444);
         this.cnv = new Canvas(this.bmp);
-        this.cnv.drawColor(this.backColor);
+        this.cnv.drawColor(this.getResources().getColor(R.color.back_color));
 
 
         this.p = new Paint();
         this.p.setStrokeWidth(this.brushSize);
         this.p.setStyle(Paint.Style.STROKE);
         this.p.setStrokeCap(Paint.Cap.ROUND);
-        this.p.setColor(this.StrokeColor);
+        this.p.setColor(this.getResources().getColor(R.color.stroke_color));
 
 
         for (int i=0; i<this.Trazos.size() ; i++){
-            this.cnv.drawPath(this.Trazos.get(i),this.p);
+            Path pa = this.Trazos.get(i);
+            if(isDoneWithEraser(pa)){
+                this.p.setColor(this.getResources().getColor(R.color.back_color));
+                this.p.setStrokeWidth(this.SIZE_MAX);
+                this.cnv.drawPath(this.Trazos.get(i),this.p);
+            }
+            else {
+                this.p.setColor(this.getResources().getColor(R.color.stroke_color));
+                this.p.setStrokeWidth(this.SIZE_SMALL);
+                this.cnv.drawPath(this.Trazos.get(i), this.p);
+            }
         }
+
+        this.p.setColor(this.getResources().getColor(R.color.stroke_color));
+        this.p.setStrokeWidth(this.SIZE_SMALL);
 
         this.invalidate();
     }
@@ -691,159 +633,12 @@ public class Cnv extends View{
      * Repinta el canvas de color blanco para
      * re-establecer la imagen a su estado por defecto
      */
-    public void Clean(){
-
-        activity_draw da = (activity_draw)this.getContext();
-        if (da.toolClicked==false){
-            da.toolClicked=true;
-            da.hide(da.ClickedID);
-        }
-
-
-        Builder b = new AlertDialog.Builder(this.getContext());
-        b.setMessage("¿Seguro que deseas re-establecer el lienzo?");
-        b.setCancelable(true);
-        b.setPositiveButton(" ¡ Un momento !!", new DialogInterface.OnClickListener() {
-            @Override
-            public void onClick(DialogInterface arg0, int arg1) {
-                // no hace nada
-            }
-        });
-
-        b.setNegativeButton(" ¡ Seguro !!", new DialogInterface.OnClickListener() {
-
-            @Override
-            public void onClick(DialogInterface arg0, int arg1) {
-                cnv.drawColor(backColor);
-
-                Trazos.add(mPa);
-                mPa = new Path();
-
-                Trazos = new ArrayList<Path>();
-                invalidate();
-
-            }
-        });
-
-        b.setTitle("Limpiar lienzo");
-        b.setIcon(this.rubIcon);
-
-        AlertDialog d = b.create();
-        d.show();
-
+    public void Clean() {
+            this.cnv.drawColor(0xFFFFFFFF);
+            this.Trazos = new ArrayList<Path>();
+            this.invalidate();
+        Toast.makeText(this.getContext(),"Nuevo Lienzo",Toast.LENGTH_SHORT).show();
     }
-
-
-
-
-
-
-
-
-    /**
-     * Método para elegir la herramienta
-     * de la regla
-     */
-
-
-    public void useRuler(){
-        this.Ruler = true;
-        this.HandMade = false;
-        this.Compass = false;
-        this.Eraser = false;
-
-        this.compasLayer=false;
-        this.compassBmp = null;
-        this.compassT1 = false;
-        this.compassT2 = false;
-
-        this.p.setColor(this.StrokeColor);
-        this.p.setStrokeWidth(this.SIZE_SMALL);
-
-        this.invalidate();
-
-    }
-
-
-    /**
-     * Método para elegir la herramienta
-     * del compas
-     */
-    public void useCompass(){
-        this.Ruler = false;
-        this.HandMade = false;
-        this.Compass = true;
-        this.Eraser = false;
-
-        this.rulerLayer = false;
-        this.rulerBmp = null;
-        this.rulerT1 = false;
-        this.rulerT2 = false;
-
-        this.p.setColor(this.StrokeColor);
-        this.p.setStrokeWidth(this.SIZE_SMALL);
-
-        this.invalidate();
-    }
-
-
-
-    /**
-     * Método para elegir la herramienta
-     * de Mano alzada
-     */
-    public void useHand(){
-        this.Ruler = false;
-        this.HandMade = true;
-        this.Compass = false;
-        this.Eraser = false;
-
-        this.compasLayer=false;
-        this.compassBmp = null;
-        this.compassT1 = false;
-        this.compassT2 = false;
-
-        this.rulerLayer = false;
-        this.rulerBmp = null;
-        this.rulerT1 = false;
-        this.rulerT2 = false;
-
-        this.p.setColor(this.StrokeColor);
-        this.p.setStrokeWidth(this.SIZE_SMALL);
-
-        this.invalidate();
-    }
-
-
-    /**
-     * Método para elegir la herramienta
-     * de Goma de borrar
-     */
-    public void useEraser(){
-        this.Ruler = false;
-        this.HandMade = false;
-        this.Compass = false;
-        this.Eraser = true;
-
-
-        this.compasLayer=false;
-        this.compassBmp = null;
-        this.compassT1 = false;
-        this.compassT2 = false;
-
-        this.rulerLayer = false;
-        this.rulerBmp = null;
-        this.rulerT1 = false;
-        this.rulerT2 = false;
-
-        this.p.setColor(this.StrokeColor);
-        this.p.setStrokeWidth(this.SIZE_SMALL);
-
-        this.invalidate();
-    }
-
-
-
 
 
     /**
@@ -852,10 +647,8 @@ public class Cnv extends View{
      */
     public void Undo(){
 
-        this.cnv.drawColor(backColor);
-
+        this.cnv.drawColor(this.getResources().getColor(R.color.back_color));
         int c = (this.Trazos.size()-doBack)-1;
-
         int c2 = 0;
 
         while(c>-1){
@@ -864,18 +657,17 @@ public class Cnv extends View{
 
                 if (this.isDoneWithEraser(p)){
 
-                    this.p.setColor(this.backColor);
+                    this.p.setColor(this.getResources().getColor(R.color.back_color));
                     this.p.setStrokeWidth(this.SIZE_MAX);
 
                     this.cnv.drawPath(this.Trazos.get(c2), this.p);
                 }else {
-                    this.p.setColor(this.StrokeColor);
+                    this.p.setColor(this.getResources().getColor(R.color.stroke_color));
                     this.p.setStrokeWidth(this.SIZE_SMALL);
 
                     this.cnv.drawPath(this.Trazos.get(c2), this.p);
 
                 }
-
 
             }
             catch (ArrayIndexOutOfBoundsException e){
@@ -915,33 +707,17 @@ public class Cnv extends View{
     }
 
 
-
     /**
      * Limpia los movimientos realizados por el usuario,
      * ya des-hechos de el Array que los almacena
      */
     public void cleanPaths(){
-
-        int c = this.doBack;
-
-        while(c>1){
-            try{
-                this.Trazos.remove( (this.Trazos.size()-1) );
-                c--;
-            } catch (ArrayIndexOutOfBoundsException e){
-                break;
-            }
-        }
-
-        this.doBack=1;
-        //this.Trazos = tmp;
+        Cleaner c= new Cleaner(this.doBack,this.Trazos);
+        this.Trazos = c.getTrazos();
+        this.doBack = 1;
         this.isUnDone=false;
     }
-	
-	
-	
-	
-	
+
 
 	/* 
 	 * -------------------
@@ -979,13 +755,6 @@ public class Cnv extends View{
         this.p.setStrokeWidth(this.brushSize);
     }
 
-    /**
-     * Método para pasarle un color a la brocha
-     * @param c
-     */
-    public void setStrokeColor(int c){
-        this.StrokeColor = c;
-    }
 
 
     public void setRubishIcon(int rubish){
@@ -993,8 +762,17 @@ public class Cnv extends View{
     }
 
 
+    /**
+     * get the Bitmap of canvas
+     */
+   public Bitmap getBitmapt(){
+       return this.bmp;
+   }
 
 
+   public Canvas getCnv(){
+       return this.cnv;
+   }
 
 
     public ArrayList<Path> getTrazos() {
@@ -1005,10 +783,6 @@ public class Cnv extends View{
         Trazos = trazos;
     }
 
-
-
-
-
     /**
      * Método para aumenar la calidad del dibujo
      */
@@ -1016,6 +790,7 @@ public class Cnv extends View{
 
         this.p.setStrokeJoin(Paint.Join.ROUND);
         this.p.setAntiAlias(true);
+
     }
 
 }

@@ -11,11 +11,14 @@ import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
-import android.widget.ImageView;
 import android.widget.LinearLayout;
+import android.widget.Toast;
 
 import com.draw_lessons.app.R;
 import com.draw_lessons.app.customView.Cnv;
+import com.draw_lessons.app.actions.Cleaner;
+import com.draw_lessons.app.actions.Saver;
+import com.draw_lessons.app.actions.Tools;
 
 import java.io.File;
 
@@ -29,6 +32,7 @@ public class activity_draw extends ActionBarActivity {
 
     public boolean toolClicked = true;
     public int ClickedID = 0;
+    private int doBack=1;
 
     private String appPath=Environment.getExternalStorageDirectory().toString()+"/DrawLessons";
 
@@ -199,7 +203,6 @@ public class activity_draw extends ActionBarActivity {
         for (int i=0; i<this.items.length; i++) {
             if(this.items[i]!=null){
                 this.items[i].setVisible(true);
-                //this.toolClicked=false;
             }
         }
     }
@@ -249,17 +252,16 @@ public class activity_draw extends ActionBarActivity {
         int id = item.getItemId();
 
         if(id == 2){
-            this.canvas.useEraser();
+            Tools.useEraser(this.canvas);
             this.ClickedID = id;
-
         }if (id == 1){
-            this.canvas.useRuler();
+            Tools.useRuler(this.canvas);
             this.ClickedID = id;
         }if (id == 0){
-            this.canvas.useHand();
+            Tools.useHand(this.canvas);
             this.ClickedID = id;
         }if (id == 4){
-            this.canvas.useCompass();
+            Tools.useCompass(this.canvas);
             this.ClickedID = id;
         }
 
@@ -272,44 +274,47 @@ public class activity_draw extends ActionBarActivity {
                 this.hide(id);
                 this.toolClicked=true;
             }
+        }
+
+        if (id == 3){
+
+            Cleaner c = new Cleaner(this, this.canvas);
+            c.cleanCanvas();
 
         }
 
-        if (id == 3){this.canvas.Clean();}
+
         if (id == 5) {
-            this.canvas.SaveIMG();
-
+              Saver s = new Saver(canvas.getBitmapt());
+              s.Save();
+              Toast.makeText(getBaseContext(),"Saved Image", Toast.LENGTH_SHORT).show();
         }
+
+
         if (item.getItemId() == 6){
             this.canvas.Undo();
         }
 
 
-
     }
+
 
 
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         this.canvas.savePaths();
-
     }
+
 
     @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         this.canvas.restorePaths();
     }
 
-    /**
-     * retorna el color de la app
-     * @return
-     */
-    public int getAppColor(){
-        return this.AppColor;
-    }
+
+
+
 }
