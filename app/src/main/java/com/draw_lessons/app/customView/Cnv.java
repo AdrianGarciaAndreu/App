@@ -463,41 +463,6 @@ public class Cnv extends View{
     }
 
 
-
-
-
-//////////////////////////////////////////////////////////////////
-/////////////////////////////////////////////////////////////////
-////////////////////////////////////////////////////////////////
-    /**
-     * Método de movimiento de compass 2
-     */
-    public void onCompassTouch2(MotionEvent event){
-
-        this.compassBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
-
-        Canvas tmpCNV = new Canvas(this.compassBmp);
-        tmpCNV.drawColor(Color.TRANSPARENT);
-
-        Paint tmpP = new Paint();
-        tmpP.setStyle(Paint.Style.STROKE);
-        tmpP.setStrokeWidth(5);
-
-        tmpP.setColor(this.getResources().getColor(R.color.app_color));
-
-
-
-        double r =0.0d;
-
-
-
-
-    }
-
-
-
-
-
     /**
      * Metodo que representa
      * a una goma de borrar mediante
