@@ -166,7 +166,7 @@ public class Cnv extends View{
      */
     @Override
     public boolean onTouchEvent(MotionEvent event) {
-        activity_draw da = (activity_draw) this.getContext();
+        activity_draw da = (activity_draw) this.getParent();
 
         if (da.toolClicked==false) {
             da.hide(da.ClickedID);

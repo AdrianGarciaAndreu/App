@@ -39,7 +39,7 @@ public class DlNavDrawer extends MaterialNavigationDrawer implements MaterialAcc
 
 		//create levels in navigation drawer
 //		this.addSection(newSection("Dibujar", new activity_draw()));
-		MaterialSection s1 = newSection("Cursos", frag2);
+		MaterialSection s1 = newSection("Canvas", frag1);
 		MaterialSection s2 = newSection("Cursos", frag2);
 		this.addSection(s1);
 		this.addSection(s2);

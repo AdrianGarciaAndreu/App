@@ -13,6 +13,7 @@ import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
@@ -48,6 +49,15 @@ public class activity_draw extends Fragment {
 
         this.items = new MenuItem[4];
         this.prepareFolders();
+		vi.setOnTouchListener(new View.OnTouchListener() {
+			public boolean onTouch(View v, MotionEvent event) {
+
+				if(event.getAction() == MotionEvent.ACTION_MOVE){
+					//do something
+				}
+				return true;
+			}
+		});
  		return vi;
     }
 
