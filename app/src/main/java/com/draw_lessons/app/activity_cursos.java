@@ -57,7 +57,7 @@ public class activity_cursos extends Fragment implements MaterialTabListener {
 
         tabHost.addTab(tabHost.newTab().setText("Mis cursos").setTabListener(this));
         tabHost.addTab(tabHost.newTab().setText("Favoritos").setTabListener(this));
-        tabHost.addTab(tabHost.newTab().setText("Todos los curos").setTabListener(this));
+        tabHost.addTab(tabHost.newTab().setText("Todos los cursos").setTabListener(this));
 		return vi;
     }
 

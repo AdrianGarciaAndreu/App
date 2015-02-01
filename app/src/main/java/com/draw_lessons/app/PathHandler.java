@@ -1,5 +1,7 @@
 package com.draw_lessons.app;
 
+
+
 import android.graphics.Path;
 
 import java.util.ArrayList;
@@ -14,36 +16,49 @@ import java.util.ArrayList;
  */
 public class PathHandler {
 
-    private static PathHandler handler;
-    private ArrayList<Path> list;
+	private static PathHandler handler;
+	private ArrayList<Path> list;
+	private ArrayList<Integer> list2;
 
-    private PathHandler() {
-    }
+	private PathHandler() {
+	}
 
 
-    /**
-     * Obtiene una instancia del Objeto
-     * @return
-     */
-    public static PathHandler getInstance() {
-        if (handler == null)
-            handler = new PathHandler();
-        return handler;
-    }
+	/**
+	 * Obtiene una instancia del Objeto
+	 *
+	 * @return
+	 */
+	public static PathHandler getInstance() {
+		if (handler == null)
+			handler = new PathHandler();
+		return handler;
+	}
 
-    /**
-     * Obtiene la Lista de Objetos
-     * @return
-     */
-    public ArrayList<Path> getList() {
-        return list;
-    }
+	/**
+	 * Obtiene la Lista de Objetos
+	 *
+	 * @return
+	 */
+	public ArrayList<Path> getList() {
+		return list;
+	}
 
-    /**
-     * Establece una lista de Objetos
-     * @param list
-     */
-    public void setList(ArrayList<Path> list) {
-        this.list = list;
-    }
+	public ArrayList<Integer> getList2() {
+		return this.list2;
+	}
+
+	/**
+	 * Establece una lista de Objetos
+	 *
+	 * @param list
+	 */
+	public void setList(ArrayList<Path> list) {
+		this.list = list;
+	}
+
+	public void setList2(ArrayList<Integer> list) {
+
+		this.list2 = list;
+	}
 }

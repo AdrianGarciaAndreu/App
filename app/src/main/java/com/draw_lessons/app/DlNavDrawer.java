@@ -22,7 +22,8 @@ public class DlNavDrawer extends MaterialNavigationDrawer implements MaterialAcc
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_dl_nav_drawer);
 	}*/
-
+		android.support.v4.app.Fragment frag2 = new activity_cursos();
+		android.support.v4.app.Fragment frag1 = new activity_draw();
 
 
 	public void init(Bundle savedInstanceState) {
@@ -38,8 +39,10 @@ public class DlNavDrawer extends MaterialNavigationDrawer implements MaterialAcc
 
 		//create levels in navigation drawer
 //		this.addSection(newSection("Dibujar", new activity_draw()));
-		MaterialSection s1 = newSection("Cursos", new activity_cursos());
+		MaterialSection s1 = newSection("Cursos", frag2);
+		MaterialSection s2 = newSection("Cursos", frag2);
 		this.addSection(s1);
+		this.addSection(s2);
 		s1.useRealColor();
 
 		// create bottom section

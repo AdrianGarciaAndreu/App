@@ -1,8 +1,7 @@
 package com.draw_lessons.app;
 
-import android.app.Activity;
 import android.app.NotificationManager;
-import android.content.Context;
+import android.graphics.drawable.ColorDrawable;
 import android.media.RingtoneManager;
 import android.net.Uri;
 import android.os.Build;
@@ -10,12 +9,16 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.ActionBarActivity;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
+import android.widget.Toast;
+
+
 
 import java.io.File;
 
@@ -31,6 +34,7 @@ public class activity_draw extends Fragment {
 
     public boolean toolClicked = true;
     public int ClickedID = 0;
+    private int doBack=1;
 
     private String appPath=Environment.getExternalStorageDirectory().toString()+"/DrawLessons";
 
@@ -39,24 +43,22 @@ public class activity_draw extends Fragment {
         super.onCreate(savedInstanceState);
 		View vi = inflater.inflate(R.layout.activity_draw,container,false);
 
-
         this.createDrawer();
 //        this.ToolbarCustom();
 
         this.items = new MenuItem[4];
         this.prepareFolders();
-		return vi;
-
+ 		return vi;
     }
 
 
 
-	NotificationCompat.Builder nb;
+    NotificationCompat.Builder nb;
 
 
     public void prepareFolders(){
 
-        nb = new NotificationCompat.Builder(this.getActivity());
+        nb = new NotificationCompat.Builder(getActivity());
 
         new Thread(new Runnable() {
 
@@ -69,10 +71,10 @@ public class activity_draw extends Fragment {
 
                     nb.setSmallIcon(R.drawable.ic_launcher);
                     nb.setContentTitle("Directorio correcto");
-                    nb.setContentText("Directorio DrawLessons creado correctamente.");
+                    nb.setContentText("Directorio para DrawLessons creado correctamente.");
                     Uri u = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
 
-                    NotificationManager nmc = (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                    NotificationManager nmc = (NotificationManager) getActivity().getSystemService(getActivity().NOTIFICATION_SERVICE);
 
                     nmc.notify(1, nb.build());
 
@@ -111,12 +113,12 @@ public class activity_draw extends Fragment {
     public void createDrawer(){
 
         int x = getActivity().getWindowManager().getDefaultDisplay().getWidth(); //resolucion del ancho de la pantalla
-        int y =getActivity().getWindowManager().getDefaultDisplay().getHeight(); // resolucion del alto de la pantalla
+        int y = getActivity().getWindowManager().getDefaultDisplay().getHeight(); // resolucion del alto de la pantalla
 
         this.l1 =(LinearLayout)getActivity().findViewById(R.id.LinearLCnv1);
 
 
-        this.canvas = new Cnv(getParentFragment().getActivity().getParent());
+        this.canvas = new Cnv(getActivity());
 
         this.canvas.setResX(x);
         this.canvas.setResY(y);
@@ -137,7 +139,7 @@ public class activity_draw extends Fragment {
      * tareas
      */
    /* public void ToolbarCustom(){
-        android.support.v7.app.ActionBar ab = .getSupportActionBar();
+        android.support.v7.app.ActionBar ab = getSupportActionBar();
         ab.setBackgroundDrawable(new ColorDrawable(0x5500AAEE));
 
         ab.setHomeButtonEnabled(true);
@@ -163,16 +165,16 @@ public class activity_draw extends Fragment {
 
 
 
-    /**
+  /*  *//**
      * Metodo para manjera los eventos de los
      * menus del ActionBar
-     */
+     *//*
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         this.addMenuItems(item);
 
         return super.onOptionsItemSelected(item);
-    }
+    }*/
 
 
 
@@ -203,7 +205,6 @@ public class activity_draw extends Fragment {
         for (int i=0; i<this.items.length; i++) {
             if(this.items[i]!=null){
                 this.items[i].setVisible(true);
-                //this.toolClicked=false;
             }
         }
     }
@@ -243,27 +244,27 @@ public class activity_draw extends Fragment {
     }
 
 
-
-    /**
+/*
+    *//**
      * Metodo para añadir acciones de control a los items
      * de los Menus de la actionBar
-     * @param item
-     */
-    public void addMenuItems(MenuItem item){
+     * @param //item
+     *//*
+	*/
+  /*  public void addMenuItems(MenuItem item){
         int id = item.getItemId();
 
         if(id == 2){
-            this.canvas.useEraser();
+            Tools.useEraser(this.canvas);
             this.ClickedID = id;
-
         }if (id == 1){
-            this.canvas.useRuler();
+            Tools.useRuler(this.canvas);
             this.ClickedID = id;
         }if (id == 0){
-            this.canvas.useHand();
+            Tools.useHand(this.canvas);
             this.ClickedID = id;
         }if (id == 4){
-            this.canvas.useCompass();
+            Tools.useCompass(this.canvas);
             this.ClickedID = id;
         }
 
@@ -276,44 +277,47 @@ public class activity_draw extends Fragment {
                 this.hide(id);
                 this.toolClicked=true;
             }
+        }
+
+        if (id == 3){
+
+            Cleaner c = new Cleaner(this, this.canvas);
+            c.cleanCanvas();
 
         }
 
-        if (id == 3){this.canvas.Clean();}
+
         if (id == 5) {
-            this.canvas.SaveIMG();
-
+              Saver s = new Saver(canvas.getBitmapt());
+              s.Save();
+              Toast.makeText(getBaseContext(),"Saved Image", Toast.LENGTH_SHORT).show();
         }
+
+
         if (item.getItemId() == 6){
             this.canvas.Undo();
         }
 
 
-
     }
+*/
 
 
 
     @Override
     public void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-
         this.canvas.savePaths();
-
     }
+
 
    /* @Override
     protected void onRestoreInstanceState(Bundle savedInstanceState) {
         super.onRestoreInstanceState(savedInstanceState);
-
         this.canvas.restorePaths();
     }*/
 
-    /**
-     * retorna el color de la app
-     * @return
-     */
-    public int getAppColor(){
-        return this.AppColor;
-    }
+
+
+
 }
