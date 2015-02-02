@@ -8,6 +8,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarActivity;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -44,7 +45,7 @@ public class activity_draw extends ActionBarActivity {
         this.createDrawer();
         this.ToolbarCustom();
 
-        this.items = new MenuItem[4];
+        this.items = new MenuItem[6];
         this.prepareFolders();
 
     }
@@ -143,7 +144,6 @@ public class activity_draw extends ActionBarActivity {
         ab.setHomeButtonEnabled(true);
         ab.setLogo(R.drawable.icondl);
 
-
         ab.setDisplayShowHomeEnabled(true);
         ab.setIcon(R.drawable.icondl);
 
@@ -162,7 +162,6 @@ public class activity_draw extends ActionBarActivity {
     }
 
 
-
     /**
      * Metodo para manjera los eventos de los
      * menus del ActionBar
@@ -170,12 +169,8 @@ public class activity_draw extends ActionBarActivity {
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         this.addMenuItems(item);
-
         return super.onOptionsItemSelected(item);
     }
-
-
-
 
 
 
@@ -191,8 +186,8 @@ public class activity_draw extends ActionBarActivity {
                 if (this.items[i].getItemId()!=h){ this.items[i].setVisible(false); }
             }
         }
-
     }
+
 
 
     /**
@@ -208,7 +203,8 @@ public class activity_draw extends ActionBarActivity {
     }
 
 
-
+   public static MenuItem i1;
+   public static MenuItem i2;
 
     /**
      * Metodo para añadir menus a la
@@ -236,9 +232,22 @@ public class activity_draw extends ActionBarActivity {
         this.items[3].setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
         this.items[3].setVisible(false);
 
+
+        this.i1 = menu.add(0,7, Menu.NONE, "Aceptar");
+        i1.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        i1.setIcon(R.drawable.check);
+        i1.setVisible(false);
+
+        this.i2 = menu.add(0,8, Menu.NONE, "Rechazar");
+        i2.setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+        i2.setIcon(R.drawable.delete);
+        i2.setVisible(false);
+
         menu.add(0,3, menu.NONE, "Limpiar").setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         menu.add(0,5, menu.NONE, "Guardar").setShowAsAction(MenuItem.SHOW_AS_ACTION_NEVER);
         menu.add(0,6, Menu.NONE, "Deshacer").setShowAsAction(MenuItem.SHOW_AS_ACTION_ALWAYS);
+
+
     }
 
 
@@ -265,7 +274,12 @@ public class activity_draw extends ActionBarActivity {
             this.ClickedID = id;
         }
 
-        if ( id !=3 && id !=5 && id !=6){
+        if ( id !=3
+                && id !=5
+                && id !=6
+                && id !=7
+                && id !=8){
+
             if (this.toolClicked==true){
                 this.UnHide();
                 this.toolClicked=false;
@@ -280,7 +294,6 @@ public class activity_draw extends ActionBarActivity {
 
             Cleaner c = new Cleaner(this, this.canvas);
             c.cleanCanvas();
-
         }
 
 
@@ -295,6 +308,32 @@ public class activity_draw extends ActionBarActivity {
             this.canvas.Undo();
         }
 
+
+        //Aceptar o rechazar Trazo
+        if(item.getItemId() == 7){
+
+            if(ClickedID==4){
+                if(!this.canvas.getCircleFixed()) {
+                    this.canvas.acceptCompassRadius();
+                }else{
+                    this.canvas.acceptCompas();
+                }
+            }else {
+                this.canvas.acceptDraw();
+            }
+        }
+        if(item.getItemId() == 8){
+
+            if(ClickedID==4){
+                if(!this.canvas.getCircleFixed()) {
+                    this.canvas.dismissCompassRadius();
+                }else{
+                    this.canvas.dismissCompass();
+                }
+            }else {
+                this.canvas.dismissDraw();
+            }
+        }
 
     }
 
@@ -313,6 +352,8 @@ public class activity_draw extends ActionBarActivity {
         super.onRestoreInstanceState(savedInstanceState);
         this.canvas.restorePaths();
     }
+
+
 
 
 

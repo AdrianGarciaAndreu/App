@@ -8,6 +8,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Path.Direction;
+import android.graphics.Region;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -66,7 +67,6 @@ public class Cnv extends View{
     private ArrayList<Integer> earserPaths = new ArrayList<Integer>(); //Almacena los paths hechos con le goma
 
 
-
     /*
      * Variables de la herrmaienta
      * Regla recta
@@ -87,6 +87,17 @@ public class Cnv extends View{
     public static boolean compassT1=false,compassT2=false;
 
     private float compassX1=0.0F, compassX2=0.0F, compassY1=0.0F, compassY2=0.0F;
+
+
+   /*
+    * Variables inter-herramientas
+    */
+    private boolean accepted=false; //especifica si está aceptado o no el trazo realizado
+    private boolean drawing=true; // especifica si está en fase de dibujado al utilizar una herramienta
+    private double p1=0.00d; // variabls para calcular una distancia
+    private double p2=0.00d;
+
+
 
 
 
@@ -153,10 +164,7 @@ public class Cnv extends View{
         }
         else {
             canvas.drawBitmap(this.bmp, 0, 0, this.p);
-
         }
-
-
 
     }
 
@@ -184,7 +192,7 @@ public class Cnv extends View{
             this.onHandMade(event);
         }
         else if (this.Compass==true){
-            this.onCompassTouch(event);
+            this.onCompassTouch2(event);
         }else if(this.Ruler==true){
             this.onRulerTouch(event);
         }else if (this.Eraser==true){
@@ -195,109 +203,253 @@ public class Cnv extends View{
     }
 
 
-
-
-
     /**
-     * Método de movimiento con la regla recta
+     * Método de dibujado de la regla recta
+     * @param event
      */
     public void onRulerTouch(MotionEvent event){
 
-		/*
-		 * Crea un canvas y un objeto paint solo para pintar sobre un bitmap dedicado
-		 * a la regla recta
-		 *
-		 */
-
         this.rulerBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
-
         Canvas tmpCNV = new Canvas(this.rulerBmp);
         tmpCNV.drawColor(Color.TRANSPARENT);
 
         Paint tmpP = new Paint();
+
         tmpP.setStyle(Paint.Style.STROKE);
         tmpP.setStrokeWidth(5);
-
         tmpP.setColor(this.getResources().getColor(R.color.app_color));
 
+        if (this.drawing==true) {
 
-        switch(event.getAction()){
+            if (rulerT1 == true && rulerT2 == true) {
 
-            case MotionEvent.ACTION_MOVE:
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
+                        p1 = this.getDistance(this.rulerX1, this.rulerY1, event.getX(), event.getY());
+                        p2 = this.getDistance(this.rulerX2, this.rulerY2, event.getX(), event.getY());
 
+                        break;
 
-                if (rulerT1==false) {
-                    tmpCNV.drawCircle(event.getX(), event.getY(), 60, tmpP);
-                    this.rulerLayer = true;
-                    this.invalidate();
+                    case MotionEvent.ACTION_MOVE:
+                        if (p1 < p2) {
+                            this.rulerX1 = event.getX();
+                            this.rulerY1 = event.getY();
+                            tmpCNV.drawLine(this.rulerX1, this.rulerY1, this.rulerX2, this.rulerY2, this.p);
+                            tmpCNV.drawCircle(this.rulerX1, this.rulerY1, 50, tmpP);
+
+                            this.invalidate();
+                        } else {
+                            this.rulerX2 = event.getX();
+                            this.rulerY2 = event.getY();
+                            tmpCNV.drawLine(this.rulerX1, this.rulerY1, this.rulerX2, this.rulerY2, this.p);
+                            tmpCNV.drawCircle(this.rulerX2, this.rulerY2, 50, tmpP);
+
+                            this.invalidate();
+
+                        }
+                        break;
+
+                    case MotionEvent.ACTION_UP:
+
+                        tmpCNV.drawLine(this.rulerX1, this.rulerY1, this.rulerX2, this.rulerY2, this.p);
+                        tmpCNV.drawCircle(this.rulerX1, this.rulerY1, 50, tmpP);
+                        tmpCNV.drawCircle(this.rulerX2, this.rulerY2, 50, tmpP);
+                        this.invalidate();
+
+                        break;
                 }
 
-                if(rulerT1==true){
-                    this.rulerX2 = event.getX(); this.rulerY2 = event.getY();
+            }
 
-                    tmpCNV.drawCircle(event.getX(), event.getY(), 60, tmpP);
-                    tmpCNV.drawCircle(this.rulerX1, this.rulerY1, 60, tmpP);
+            if (Cnv.rulerT1 == true && Cnv.rulerT2 == false) {
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
 
-                    this.mPa.moveTo(this.rulerX1, this.rulerY1);
-                    this.mPa.lineTo(event.getX(), event.getY());
+                        Cnv.rulerLayer = true;
+                        tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                        tmpCNV.drawCircle(this.rulerX1, this.rulerY1, 50, tmpP);
+                        this.invalidate();
+                        break;
 
-                    tmpCNV.drawPath(this.mPa, this.p);
+                    case MotionEvent.ACTION_MOVE:
+                        tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                        tmpCNV.drawCircle(this.rulerX1, this.rulerY1, 50, tmpP);
+                        tmpCNV.drawLine(this.rulerX1,this.rulerY1,event.getX(),event.getY(),this.p);
+                        this.invalidate();
+                        break;
 
-                    this.invalidate();
+                    case MotionEvent.ACTION_UP:
+                        tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                        tmpCNV.drawCircle(this.rulerX1, this.rulerY1, 50, tmpP);
+                        this.rulerX2 = event.getX();
+                        this.rulerY2 = event.getY();
+                        tmpCNV.drawPoint(event.getX(), event.getY(), this.p);
 
-                    this.mPa = new Path();
-                    this.rulerT2=true;
-                    this.rulerLayer = true;
 
+                        tmpCNV.drawLine(this.rulerX1, this.rulerY1, this.rulerX2, this.rulerY2, this.p);
+                        //Activar Check y la cruz
+
+                        activity_draw.i1.setVisible(true);
+                        activity_draw.i2.setVisible(true);
+
+                        this.invalidate();
+
+                        Cnv.rulerT2 = true;
+                        break;
                 }
-                break;
 
-            case MotionEvent.ACTION_UP:
+            }
 
-                if (this.rulerT1==false) {
+            if (Cnv.rulerT1 == false && Cnv.rulerT2 == false) {
 
-                    this.mPa.moveTo(event.getX()-1, event.getY()-1);
-                    this.mPa.lineTo(event.getX()+1, event.getY()+1);
-                    this.cnv.drawPath(this.mPa, this.p);
+                switch (event.getAction()) {
+                    case MotionEvent.ACTION_DOWN:
 
-                    this.rulerX1 = event.getX();
-                    this.rulerY1 = event.getY();
+                        Cnv.rulerLayer = true;
+                        tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                        this.invalidate();
+                        break;
 
-                    this.invalidate();
-                    this.rulerT1=true;
+                    case MotionEvent.ACTION_MOVE:
+                        tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                        this.invalidate();
+                        break;
 
+                    case MotionEvent.ACTION_UP:
+                        tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                        this.rulerX1 = event.getX();
+                        this.rulerY1 = event.getY();
+                        tmpCNV.drawPoint(event.getX(), event.getY(), this.p);
+
+                        Cnv.rulerT1 = true;
+                        this.invalidate();
+                        break;
                 }
 
-
-                tmpCNV.drawCircle(event.getX(), event.getY(), 60, tmpP);
-
-                if (rulerT1==true && rulerT2==true) {
-
-                    this.mPa = new Path();
-                    this.mPa.moveTo(this.rulerX1, this.rulerY1);
-                    this.mPa.lineTo(this.rulerX2, this.rulerY2);
-                    this.cnv.drawPath(this.mPa, this.p);
-
-                    this.Trazos.add(this.mPa);
-                    this.mPa = new Path();
-
-                    this.rulerLayer=false;
-                    this.rulerT1=false;
-                    this.rulerT2=false;
-                    this.rulerBmp = null;
-
-                    this.invalidate();
-                }
-                break;
+            }
 
 
+        }else if (this.drawing==false){
+
+            if (accepted) {
+                this.mPa.moveTo(this.rulerX1, this.rulerY1);
+                this.mPa.lineTo(this.rulerX2, this.rulerY2);
+                this.cnv.drawPath(this.mPa, this.p);
+
+                this.Trazos.add(this.mPa);
+                this.mPa = new Path();
+
+                this.rulerLayer = false;
+                this.drawing=true;
+                this.rulerT1 = false;
+                this.rulerT2 = false;
+                this.rulerBmp = null;
+            }else {
+                this.rulerLayer = false;
+                this.drawing=true;
+                this.rulerT1 = false;
+                this.rulerT2 = false;
+                this.rulerBmp = null;
+            }
+            activity_draw.i1.setVisible(false);
+            activity_draw.i2.setVisible(false);
+            this.invalidate();
         }
-
 
 
     }
 
 
+    /**
+     * Método para aceptar el trazo a realizar
+     * por una herramienta
+     */
+    public void acceptDraw(){
+        this.accepted=true;
+        this.drawing=false;
+        this.onRulerTouch(null);
+        this.p1=0.00d;
+        this.p2=0.00d;
+
+    }
+
+    /**
+     * Método para rechazar el trazo
+     * a una herramienta
+     */
+    public void dismissDraw(){
+        this.accepted=false;
+        this.drawing=false;
+        this.onRulerTouch(null);
+        this.p1=0.00d;
+        this.p2=0.00d;
+    }
+
+
+    public static boolean compassT3=false;
+
+    public void acceptCompassRadius(){
+
+        Cnv.compassT3 = true;
+        this.onCompassTouch2(null);
+
+    }
+
+
+    /**
+     * aceptación final de el uso de el compás
+     */
+    public void acceptCompas(){
+
+        this.cnv.drawPath(this.path,this.p);
+        this.Trazos.add(this.path);
+        this.path= new Path();
+
+        Cnv.compassT3=false;
+        Cnv.compassT2=false;
+        Cnv.compassT1=false;
+
+        Cnv.compasLayer=false;
+        Cnv.compassBmp = null;
+        this.circleFixed=false;
+
+        this.invalidate();
+    }
+
+    public void dismissCompass(){
+        this.path = new Path();
+        this.ePa = new Path();
+        this.iPa = new Path();
+
+        Cnv.compassT3=false;
+        Cnv.compassT2=false;
+        Cnv.compassT1=false;
+
+        Cnv.compasLayer=false;
+        Cnv.compassBmp = null;
+        this.circleFixed=false;
+
+        this.invalidate();
+
+    }
+
+
+    public void dismissCompassRadius(){
+
+        this.path = new Path();
+        this.ePa = new Path();
+        this.iPa = new Path();
+
+        Cnv.compassT3=false;
+        Cnv.compassT2=false;
+        Cnv.compassT1=false;
+
+        Cnv.compasLayer=false;
+        Cnv.compassBmp = null;
+        this.circleFixed=false;
+
+        this.invalidate();
+    }
 
 
 
@@ -347,121 +499,213 @@ public class Cnv extends View{
 
     }
 
+    private boolean circleFixed=false;
+    Path ePa = new Path();
+    Path iPa = new Path();
+
+    Path path = new Path();
+
+    public boolean getCircleFixed(){
+        return this.circleFixed;
+    }
+
+    public void setCircleFixed(boolean f){
+        this.circleFixed = f;
+    }
 
 
+    //////////////////////////////////////////////////////////
+    /////////////////////////////////////////////////////////
+    ////////////////////////////////////////////////////////
 
     /**
-     * Método de movimiento de compass	
+     * Método definitivo de compás
+     * @param event
      */
-    public void onCompassTouch(MotionEvent event){
+    public void onCompassTouch2(MotionEvent event){
 
-        this.compassBmp = Bitmap.createBitmap(this.resX,this.resY,Bitmap.Config.ARGB_4444);
+        Cnv.compassBmp = Bitmap.createBitmap(this.resX,this.resY,Config.ARGB_4444);
+        Canvas tmpCnv = new Canvas(Cnv.compassBmp);
 
-        Canvas tmpCNV = new Canvas(this.compassBmp);
-        tmpCNV.drawColor(Color.TRANSPARENT);
+        Paint tmpP1 = new Paint();
+        tmpP1.setStyle(Paint.Style.STROKE);
+        tmpP1.setColor(this.getResources().getColor(R.color.app_color));
+        tmpP1.setStrokeWidth(SIZE_SMALL);
 
-        Paint tmpP = new Paint();
-        tmpP.setStyle(Paint.Style.STROKE);
-        tmpP.setStrokeWidth(5);
+        Paint paint = new Paint();
+        paint.setStrokeWidth(SIZE_SMALL);
+        paint.setStyle(Paint.Style.STROKE);
+        paint.setColor(0x33BBBBBB);
 
-        tmpP.setColor(this.getResources().getColor(R.color.app_color));
+        Paint tmpP2 = new Paint();
+        tmpP2.setColor(Color.RED);
 
-        double c=0.0d;
 
-        if (this.compassT1 == false) {
 
-            switch(event.getAction()){
+        if(this.drawing==true){
 
-                case MotionEvent.ACTION_DOWN:
-                    event.setAction(MotionEvent.ACTION_MOVE);
-                    break;
+            if(Cnv.compassT1==true && Cnv.compassT2 == true && Cnv.compassT3 == true){
+                float r =(float)this.getDistance(this.compassX1,this.compassY1,this.compassX2,this.compassY2);
+                if(!circleFixed){
+                    tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                    tmpCnv.drawLine(this.compassX1, this.compassY1, this.compassX2, this.compassY2, paint);
+                    this.circleFixed=true;
+                }else{
+                    tmpP2.setStyle(Paint.Style.STROKE);
+                    ePa.addCircle(this.compassX1,this.compassY1,r,Direction.CCW);
+                    tmpCnv.drawPath(ePa,tmpP2);
 
-                case MotionEvent.ACTION_MOVE:
-                    this.compasLayer=true;
-                    tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
+                    tmpP2.setStyle(Paint.Style.FILL);
+                    iPa.addCircle(this.compassX1,this.compassY1,(r-SIZE_SMALL),Direction.CCW);
+                    tmpCnv.drawPath(iPa,tmpP2);
+
+                    tmpCnv.clipPath(ePa, Region.Op.REPLACE);
+                    tmpCnv.clipPath(iPa, Region.Op.DIFFERENCE);
+
                     this.invalidate();
-                    break;
+                   switch(event.getAction()){
 
-                case MotionEvent.ACTION_UP:
-                    this.compassT1=true;
-                    tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
-                    tmpCNV.drawPoint(event.getX(), event.getY(), tmpP);
+                       case MotionEvent.ACTION_DOWN:
+                           tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                           tmpCnv.drawLine(this.compassX1, this.compassY1, this.compassX2, this.compassY2, paint);
 
+                           this.path.moveTo(this.compassX1,this.compassY1);
+                           this.path.lineTo(event.getX(),event.getY());
+                           tmpCnv.drawPath(path,this.p);
 
-                    this.compassX1 = event.getX();
-                    this.compassY1 = event.getY();
-                    this.mPa.moveTo(event.getX(), event.getY());
+                       break;
+
+                       case MotionEvent.ACTION_MOVE:
+                           tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                           tmpCnv.drawLine(this.compassX1, this.compassY1, this.compassX2, this.compassY2, paint);
+
+                           this.path.moveTo(this.compassX1,this.compassY1);
+                           this.path.lineTo(event.getX(),event.getY());
+                           tmpCnv.drawPath(path,this.p);
+
+                           break;
+
+                       case MotionEvent.ACTION_UP:
+                           tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                           tmpCnv.drawLine(this.compassX1, this.compassY1, this.compassX2, this.compassY2, paint);
+
+                           this.path.moveTo(this.compassX1,this.compassY1);
+                           this.path.lineTo(event.getX(),event.getY());
+                           tmpCnv.drawPath(path,this.p);
+
+                           break;
+
+                    }
 
                     this.invalidate();
+                }
 
-                    break;
+
+                this.invalidate();
             }
 
-        } else if (this.compassT1==true){
 
+            if(Cnv.compassT1==true && Cnv.compassT2==true && Cnv.compassT3==false){
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                        float r =(float)this.getDistance(this.compassX1,this.compassY1,event.getX(),event.getY());
+                        tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                        tmpCnv.drawLine(this.compassX1,this.compassY1,event.getX(),event.getY(),paint);
 
+                        tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
+                    break;
+                    case MotionEvent.ACTION_MOVE:
+                        r =(float)this.getDistance(this.compassX1,this.compassY1,event.getX(),event.getY());
+                        tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                        tmpCnv.drawLine(this.compassX1,this.compassY1,event.getX(),event.getY(),paint);
 
-            switch (event.getAction()){
+                        tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
 
-                case MotionEvent.ACTION_DOWN:
-                    this.compassX2 = event.getX();
-                    this.compassY2 = event.getY();
+                        break;
+                    case MotionEvent.ACTION_UP:
+                        this.compassX2 = event.getX();
+                        this.compassY2 = event.getY();
+                        r =(float)this.getDistance(this.compassX1,this.compassY1,event.getX(),event.getY());
+                        tmpCnv.drawCircle(this.compassX1,this.compassY1,r,paint);
+                        tmpCnv.drawLine(this.compassX1,this.compassY1,this.compassX2,this.compassY2,paint);
 
-                    tmpCNV.drawCircle(event.getX(), event.getY(), 50, tmpP);
-                    this.invalidate();
+                        tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
 
                     break;
-
-                case MotionEvent.ACTION_MOVE:
-                    this.compassX2 = event.getX();
-                    this.compassY2 = event.getY();
-
-                    c = this.getRadius();
+                }
+                this.invalidate();
+            }
 
 
+            if(Cnv.compassT1==true && Cnv.compassT2==false && Cnv.compassT3==false){
+                switch(event.getAction()){
+                    case MotionEvent.ACTION_DOWN:
+                            tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
+                            tmpCnv.drawCircle(this.compassX1,this.compassY1,50,tmpP1);
+                        break;
+                    case MotionEvent.ACTION_MOVE:
+                        tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
+                        tmpCnv.drawCircle(this.compassX1,this.compassY1,50,tmpP1);
 
-                    this.mPa.moveTo(this.compassX1, this.compassY1);
-                    this.mPa.lineTo(event.getX(), event.getY());
+                        //Circulo de referencia
+                        float r =(float)this.getDistance(this.compassX1,this.compassY1,event.getX(),event.getY());
+                        tmpCnv.drawCircle(this.compassX1,this.compassY1,r,this.p);
+                        tmpCnv.drawLine(this.compassX1,this.compassY1,event.getX(),event.getY(),this.p);
 
-                    this.mPa.moveTo(event.getX(), event.getY());
-                    this.mPa.addCircle(this.compassX1, this.compassY1, (float)c, Direction.CCW);
-                    tmpCNV.drawPath(this.mPa, this.p);
+                        break;
+                    case MotionEvent.ACTION_UP:
 
-                    this.invalidate();
-                    this.mPa = new Path();
+                        this.compassX2 = event.getX();
+                        this.compassY2 = event.getY();
+
+                        r = (float)this.getDistance(this.compassX1,this.compassY1,this.compassX2,this.compassY2);
+                        tmpCnv.drawCircle(this.compassX1,this.compassY1,r, paint);
+                        tmpCnv.drawLine(this.compassX1,this.compassY1,this.compassX2,this.compassY2,paint);
+
+                        activity_draw.i1.setVisible(true);
+                        activity_draw.i2.setVisible(true);
+
+                        Cnv.compassT2 = true;
+
+                        break;
+                }
+                this.invalidate();
+            }
+
+            if(Cnv.compassT1==false && Cnv.compassT2==false && Cnv.compassT3==false){
+
+               switch (event.getAction()){
+
+                    case MotionEvent.ACTION_DOWN:
+                       Cnv.compasLayer=true;
+                       tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
+                       //this.invalidate();
+                    break;
+                    case MotionEvent.ACTION_MOVE:
+                        tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
+                    break;
+                    case MotionEvent.ACTION_UP:
+                        this.compassX1=event.getX();
+                        this.compassY1=event.getY();
+
+                        tmpCnv.drawCircle(event.getX(),event.getY(),50,tmpP1);
+                        tmpCnv.drawPoint(event.getX(),event.getY(),this.p);
+
+                        Cnv.compassT1=true;
 
                     break;
+               }
+                this.invalidate();
 
-                case MotionEvent.ACTION_UP:
-                    this.compassX2 = event.getX();
-                    this.compassY2 = event.getY();
-
-                    c = this.getRadius();
-
-
-                    this.mPa.moveTo(event.getX(), event.getY());
-                    this.mPa.addCircle(this.compassX1, this.compassY1, (float)c, Direction.CCW);
-
-                    this.cnv.drawPath(this.mPa, this.p);
-                    this.invalidate();
-
-                    this.Trazos.add(this.mPa);
-                    this.mPa = new Path();
-
-                    this.compasLayer=false;
-                    this.compassT1 = false;
-                    this.compassT2 = false;
-                    this.compassBmp = null;
-
-                    this.invalidate();
-
-                    break;
 
             }
+
 
         }
-
     }
+
+
+
 
 
     /**
@@ -524,6 +768,24 @@ public class Cnv extends View{
 
 
 
+    /**
+     * Devuelve la distancia entre
+     * 2 puntos
+     * @param x1
+     * @param y1
+     * @param x2
+     * @param y2
+     * @return
+     */
+    public double getDistance(float x1, float y1, float x2, float y2){
+        double c=0.00D;
+
+        float a = (x1-x2);
+        float b = (y1-y2);
+        c = Math.sqrt((a*a)+(b*b));
+        return c;
+    }
+
 
     /**
      * devuelve la distancia entre 2 puntos.
@@ -532,7 +794,6 @@ public class Cnv extends View{
      * @return
      */
     public double getRadius(){
-
 
         float a = (this.compassX1 - this.compassX2);
         float b = (this.compassY1 - this.compassY2);
